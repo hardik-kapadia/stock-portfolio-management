@@ -49,4 +49,10 @@ public class User {
         this.netProfitPercentage = 0.0;
     }
 
+    public void invest(Investment investment){
+        this.investments.add(investment);
+        this.netInvested += investment.getNetInvested();
+        this.netProfit += investment.getNetProfit();
+    }
+
 }
