@@ -22,10 +22,13 @@ public class User {
 
     private List<Investment> investments;
 
-    private Double netProfit;
-    private Double netProfitPercentage;
+    private Double unrealizedGains;
+    private Double unrealizedGainsPercentage;
 
-    public User(@NonNull String name, String email, String mobileNumber, @NonNull String accountNumber, Double netInvested, Double netPortfolioValue, List<Investment> investments, Double netProfit, Double netProfitPercentage) {
+    private Double realizedGains;
+    private Double realizedGainsPercentage;
+
+    public User(@NonNull String name, String email, String mobileNumber, @NonNull String accountNumber, Double netInvested, Double netPortfolioValue, List<Investment> investments, Double unrealizedGains, Double unrealizedGainsPercentage, Double realizedGains, Double realizedGainsPercentage) {
         this.name = name;
         this.email = email;
         this.mobileNumber = mobileNumber;
@@ -33,8 +36,10 @@ public class User {
         this.netInvested = netInvested;
         this.netPortfolioValue = netPortfolioValue;
         this.investments = investments;
-        this.netProfit = netProfit;
-        this.netProfitPercentage = netProfitPercentage;
+        this.unrealizedGains = unrealizedGains;
+        this.unrealizedGainsPercentage = unrealizedGainsPercentage;
+        this.realizedGains = realizedGains;
+        this.realizedGainsPercentage = realizedGainsPercentage;
     }
 
     public User(@NonNull String name, String email, String mobileNumber, @NonNull String accountNumber) {
@@ -45,14 +50,33 @@ public class User {
         this.netInvested = 0.0;
         this.netPortfolioValue = 0.0;
         this.investments = new ArrayList<>();
-        this.netProfit = 0.0;
-        this.netProfitPercentage = 0.0;
+        this.unrealizedGains = 0.0;
+        this.unrealizedGainsPercentage = 0.0;
+        this.realizedGains = 0.0;
+        this.realizedGainsPercentage = 0.0;
     }
 
-    public void invest(Investment investment){
+    public void invest(Investment investment) {
         this.investments.add(investment);
         this.netInvested += investment.getNetInvested();
-        this.netProfit += investment.getNetProfit();
+        this.unrealizedGains += investment.getNetProfit();
     }
+
+    public void buy(Stock stock, Double buyPrice) {
+
+
+        Investment previousInvestment = null;
+
+        for (Investment investment : investments)
+            if (investment.getStock().equals(stock)) {
+                previousInvestment = investment;
+                break;
+            }
+
+
+
+
+    }
+
 
 }

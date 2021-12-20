@@ -20,5 +20,9 @@ public class StockDataService {
         return null;
     }
 
+    public void updateStock(Stock stock){
+        // TODO: complete with API calls
+    }
+
 
 }

@@ -1,11 +1,18 @@
 package com.example.stockapi.model;
 
+import com.example.stockapi.dao.StockDataService;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+
+import java.util.Objects;
 
 @Data
 public class Stock {
 
+    static StockDataService stockDataService = new StockDataService();
+
+    @JsonIgnore
     private final String id;
 
     private final String name;
@@ -42,14 +49,34 @@ public class Stock {
         this.latestLow = latestLow;
         this.fiftyTwoWeekHigh = fiftyTwoWeekHigh;
         this.fiftyTwoWeekLow = fiftyTwoWeekLow;
-        this.id = this.exchange.toString() + "-" + this.symbol;
+        this.id = this.exchange + ":" + this.symbol;
     }
 
     public Stock(String name, String symbol, String exchange) {
         this.name = name;
         this.symbol = symbol;
         this.exchange = Exchange.valueOf(exchange);
-        this.id = this.exchange.toString() + "-" + this.symbol;
+        this.id = this.exchange + ":" + this.symbol;
     }
 
+    public static Stock getStockFromSymbolAndExchange(String symbol, String exchange) {
+        return stockDataService.getStock(symbol, exchange);
+    }
+
+    public static Stock getStockFromSymbol(String symbol) {
+        return getStockFromSymbolAndExchange(symbol, "NS");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Stock)) return false;
+        Stock stock = (Stock) o;
+        return getId().equals(stock.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
+    }
 }
