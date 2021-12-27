@@ -11,6 +11,11 @@ public class Cryptocurrency implements ETF{
 
     private final String name;
     private final String symbol;
-    private double LTP;
+    private Double LTP;
+
+    @Override
+    public Double getLTP() {
+        return this.LTP;
+    }
 
 }

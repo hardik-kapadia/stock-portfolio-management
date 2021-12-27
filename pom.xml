@@ -20,15 +20,8 @@
     <description>StockAPI</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <dependencies>
 
@@ -61,14 +54,13 @@
             <version>1.6.1</version>
         </dependency>
 
-        <!--
         <dependency>
-            <groupId>io.github.mainstringargs.alphavantagescraper</groupId>
-            <artifactId>alpha-vantage-scraper</artifactId>
-            <version>1.5.1</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.10.19</version>
+            <scope>test</scope>
         </dependency>
 
-        -->
     </dependencies>
 
     <build>

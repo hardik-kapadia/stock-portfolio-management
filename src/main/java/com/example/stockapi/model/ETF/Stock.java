@@ -1,87 +1,63 @@
 package com.example.stockapi.model.ETF;
 
-import com.example.stockapi.dao.StockDataService;
-import com.example.stockapi.model.Exchange;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import java.util.Objects;
 
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Stock implements ETF {
 
-    static StockDataService stockDataService;
-
-    private final String id;
-
-    private final String name;
+    @JsonAlias("01. symbol")
     private final String symbol;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private final Exchange exchange;
+    private String name;
 
-    private Double PE;
-    private Double EPS;
-
+    @JsonAlias("05. price")
     private Double LTP;
 
+    @JsonAlias("02. open")
     private Double previousOpen;
+
+    @JsonAlias("08. previous close")
     private Double previousClose;
 
-    private Double latestHigh;
-    private Double latestLow;
+    @JsonAlias("03. high")
+    private Double high;
 
-    private Double fiftyTwoWeekHigh;
-    private Double fiftyTwoWeekLow;
+    @JsonAlias("04. low")
+    private Double low;
 
-
-    public Stock(String name, String symbol, String exchange, Double PE, Double EPS, Double LTP, Double previousOpen, Double previousClose, Double latestHigh, Double latestLow, Double fiftyTwoWeekHigh, Double fiftyTwoWeekLow) {
-        this.name = name;
+    public Stock(String symbol) {
         this.symbol = symbol;
-        this.exchange = Exchange.valueOf(exchange);
-        this.PE = PE;
-        this.EPS = EPS;
-        this.LTP = LTP;
-        this.previousOpen = previousOpen;
-        this.previousClose = previousClose;
-        this.latestHigh = latestHigh;
-        this.latestLow = latestLow;
-        this.fiftyTwoWeekHigh = fiftyTwoWeekHigh;
-        this.fiftyTwoWeekLow = fiftyTwoWeekLow;
-        this.id = this.exchange + ":" + this.symbol;
+        this.name = this.symbol.split("\\.")[0];
     }
 
-    public Stock(String name, String symbol, String exchange) {
-        this.name = name;
+    public Stock(String symbol, String name) {
         this.symbol = symbol;
-        this.exchange = Exchange.valueOf(exchange);
-        this.id = this.exchange + ":" + this.symbol;
-    }
-
-    public static Stock getStockFromSymbolAndExchange(String symbol, String exchange) {
-        return stockDataService.getStock(symbol, exchange);
-    }
-
-    public static Stock getStockFromSymbol(String symbol) {
-        return getStockFromSymbolAndExchange(symbol, "NSE");
+        this.name = name;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Stock)) return false;
-        Stock stock = (Stock) o;
-        return getId().equals(stock.getId());
+        if (!(o instanceof Stock stock)) return false;
+        return this.getSymbol().equals(stock.getSymbol());
+    }
+
+    @Override
+    public Double getLTP() {
+        return this.LTP;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId());
+        return Objects.hash(getSymbol());
     }
 
 }

@@ -1,50 +1,221 @@
 package com.example.stockapi.dao;
 
-import com.crazzyghost.alphavantage.AlphaVantage;
-import com.crazzyghost.alphavantage.Config;
 import com.example.stockapi.config.StockApiConfig;
+import com.example.stockapi.exception.ApiException;
 import com.example.stockapi.model.ETF.Stock;
+import com.example.stockapi.model.ETF.StockSearchResult;
+import com.example.stockapi.service.MyJsonMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class StockDataService {
 
+    private final static String baseUrl = "https://www.alphavantage.co/query";
+
     StockApiConfig stockApiConfig;
+    RestTemplate restTemplate;
+    MyJsonMapper myJsonMapper;
 
     @Autowired
-    public StockDataService(StockApiConfig stockApiConfig) {
+    public StockDataService(StockApiConfig stockApiConfig, MyJsonMapper myJsonMapper) {
 
         this.stockApiConfig = stockApiConfig;
+        this.myJsonMapper = myJsonMapper;
+        this.restTemplate = new RestTemplate();
 
-        AlphaVantage.api().init(Config.builder()
-                .key(this.stockApiConfig.API_KEY)
-                .timeOut(20)
-                .build());
     }
 
-    public Stock getStock(String symbol, String exchange) {
-        // TODO: complete with API calls
-        return null;
+    // for testing purposes
+    public StockDataService(String API_KEY) {
+
+        this.stockApiConfig = new StockApiConfig(API_KEY);
+        this.myJsonMapper = new MyJsonMapper();
+
+        this.restTemplate = new RestTemplate();
+
     }
 
-    public void updateStock(Stock stock) {
-        // TODO: complete with API calls
+
+    private ResponseEntity<JsonNode> getResponseForQuote(String symbol) {
+
+        String uri = UriComponentsBuilder.fromUriString(baseUrl)
+                .encode()
+                .queryParam("function", "{function}")
+                .queryParam("symbol", "{symbol}")
+                .queryParam("apikey", "{API_KEY}")
+                .toUriString();
+
+        Map<String, String> params = new HashMap<>();
+
+        params.put("function", "GLOBAL_QUOTE");
+        params.put("symbol", symbol);
+        params.put("API_KEY", this.stockApiConfig.API_KEY);
+        System.out.println("Final uri: " + uri);
+
+        return restTemplate.getForEntity(uri, JsonNode.class, params);
     }
 
-    public List<Stock> searchForSymbol(String query) {
-        // TODO: complete search result
-        return null;
+
+    private ResponseEntity<JsonNode> getResponseForSearching(String keywords) {
+        String uri = UriComponentsBuilder.fromUriString(baseUrl)
+                .encode()
+                .queryParam("function", "{function}")
+                .queryParam("keywords", "{keywords}")
+                .queryParam("apikey", "{API_KEY}")
+                .toUriString();
+
+        Map<String, String> params = new HashMap<>();
+
+        params.put("function", "SYMBOL_SEARCH");
+        params.put("keywords", keywords);
+        params.put("API_KEY", this.stockApiConfig.API_KEY);
+        System.out.println("Final uri: " + uri);
+
+        return restTemplate.getForEntity(uri, JsonNode.class, params);
     }
 
-    @Autowired
-    public void setStockApiConfig(StockApiConfig stockApiConfig) {
-        this.stockApiConfig = stockApiConfig;
+    public void updateStock(Stock stock) throws ApiException {
+
+        ResponseEntity<JsonNode> responseEntity = getResponseForQuote(stock.getSymbol());
+
+        System.out.println("Response: " + responseEntity);
+
+        if (responseEntity.getStatusCodeValue() / 100 == 2) {
+
+            printResponse(responseEntity);
+
+            JsonNode obj = Objects.requireNonNull(responseEntity.getBody()).get("Global Quote");
+
+            try {
+                Stock result = this.myJsonMapper.getStockFromNode(obj);
+
+                System.out.println("Stock: stock");
+
+                stock.setLTP(result.getLTP());
+                stock.setHigh(result.getHigh());
+                stock.setLow(result.getLow());
+                stock.setPreviousClose(result.getPreviousClose());
+                stock.setPreviousOpen(result.getPreviousOpen());
+
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } else
+            throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
+
+    }
+
+    public Stock getStockFromStockSearchResult(StockSearchResult stockSearchResult) throws ApiException {
+        Stock stock = new Stock(stockSearchResult.getSymbol(), stockSearchResult.getName());
+        updateStock(stock);
+        return stock;
+    }
+
+    public void setNameFor(Stock stock) throws ApiException {
+
+        ResponseEntity<JsonNode> responseEntity = getResponseForSearching(stock.getSymbol().split("\\.")[0]);
+
+        System.out.println("Response: " + responseEntity);
+
+        if (responseEntity.getStatusCodeValue() / 100 == 2) {
+
+            printResponse(responseEntity);
+
+            JsonNode oj = Objects.requireNonNull(responseEntity.getBody()).get("bestMatches");
+
+            try {
+                List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
+                for (StockSearchResult ssr : result) {
+                    if (ssr.getMatchScore() >= 9.9) {
+                        stock.setName(ssr.getName());
+                        break;
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        } else
+            throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
+
+    }
+
+    public List<StockSearchResult> searchForSymbol(String query) throws ApiException {
+
+        ResponseEntity<JsonNode> responseEntity = getResponseForSearching(query.strip());
+
+        System.out.println("Response: " + responseEntity);
+
+        if (responseEntity.getStatusCodeValue() / 100 == 2) {
+
+            printResponse(responseEntity);
+
+            JsonNode oj = Objects.requireNonNull(responseEntity.getBody()).get("bestMatches");
+
+            try {
+                List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
+                result = result.stream().filter(ssr -> ssr.getRegion().contains("India")).toList();
+                System.out.println("result: " + result);
+
+                return result;
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
+
+    }
+
+    public Stock getStockFromSymbol(String symbol) throws ApiException, IllegalArgumentException {
+
+        ResponseEntity<JsonNode> responseEntity = getResponseForSearching(symbol.split("\\.")[0]);
+
+        System.out.println("Response: " + responseEntity);
+
+        if (responseEntity.getStatusCodeValue() / 100 == 2) {
+
+            printResponse(responseEntity);
+
+            JsonNode oj = Objects.requireNonNull(responseEntity.getBody()).get("bestMatches");
+
+            try {
+                List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
+
+                if (result.size() == 0)
+                    throw new IllegalArgumentException();
+
+                for (StockSearchResult ssr : result) {
+                    if (ssr.getMatchScore() >= 9.9) {
+                        return getStockFromStockSearchResult(ssr);
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
+    }
+
+    public static void printResponse(ResponseEntity<?> responseEntity) {
+
+        System.out.println("--------------Status--------------");
+        System.out.println(responseEntity.getStatusCode());
+        System.out.println("--------------Headers--------------");
+        System.out.println(responseEntity.getHeaders());
+        System.out.println("--------------Body--------------");
+        System.out.println(responseEntity.getBody());
     }
 
 

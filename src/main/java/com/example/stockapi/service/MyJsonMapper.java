@@ -1,6 +1,7 @@
 package com.example.stockapi.service;
 
 import com.example.stockapi.model.ETF.Stock;
+import com.example.stockapi.model.ETF.StockSearchResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,19 +23,20 @@ public class MyJsonMapper {
         this.objectMapper = new ObjectMapper();
     }
 
-    public Stock getFromNode(JsonNode node) throws JsonProcessingException {
+    public Stock getStockFromNode(JsonNode node) throws JsonProcessingException {
         return this.objectMapper.treeToValue(node, Stock.class);
     }
 
-    public List<Stock> getAllFromNode(JsonNode node) throws JsonProcessingException {
+    public List<StockSearchResult> getAllFromNode(JsonNode node) throws JsonProcessingException {
 
         if (node.getNodeType() == JsonNodeType.ARRAY) {
 
-            List<Stock> all = new ArrayList<>();
+            List<StockSearchResult> all = new ArrayList<>();
             Iterator<JsonNode> elements = node.elements();
 
+
             while (elements.hasNext())
-                all.add(getFromNode(elements.next()));
+                all.add(this.objectMapper.treeToValue(elements.next(), StockSearchResult.class));
 
             return all;
         } else
