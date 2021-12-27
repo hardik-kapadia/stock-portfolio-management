@@ -6,6 +6,8 @@ target/
 
 src/main/resources/secret.data
 
+*secret.data*
+
 ### STS ###
 .apt_generated
 .classpath
