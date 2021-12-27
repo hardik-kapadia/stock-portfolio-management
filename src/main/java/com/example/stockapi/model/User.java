@@ -1,5 +1,7 @@
 package com.example.stockapi.model;
 
+import com.example.stockapi.model.ETF.ETF;
+import com.example.stockapi.model.ETF.Stock;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -62,18 +64,16 @@ public class User {
         this.unrealizedGains += investment.getNetProfit();
     }
 
-    public void buy(Stock stock, Double buyPrice) {
+    public void buy(ETF etf, Double buyPrice) {
 
 
         Investment previousInvestment = null;
 
         for (Investment investment : investments)
-            if (investment.getStock().equals(stock)) {
+            if (investment.getEtf().equals(etf)) {
                 previousInvestment = investment;
                 break;
             }
-
-
 
 
     }

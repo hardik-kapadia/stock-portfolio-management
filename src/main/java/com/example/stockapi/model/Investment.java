@@ -1,5 +1,7 @@
 package com.example.stockapi.model;
 
+import com.example.stockapi.model.ETF.ETF;
+import com.example.stockapi.model.ETF.Stock;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -9,7 +11,7 @@ public class Investment {
 
     int id;
 
-    private final Stock stock;
+    private final ETF etf;
 
     private Integer quantity;
 
@@ -27,9 +29,9 @@ public class Investment {
     }
 
     // Supplying just the Stock, the Quantity and the buy Price
-    public Investment(Stock stock, Integer quantity, Double averageBuyPrice) {
+    public Investment(ETF etf, Integer quantity, Double averageBuyPrice) {
 
-        this.stock = stock;
+        this.etf = etf;
 
         buy(quantity, averageBuyPrice);
 
@@ -39,7 +41,7 @@ public class Investment {
     // Updates stock data
     public void refresh() {
 
-        this.currentValue = this.stock.getLTP() * quantity;
+        this.currentValue = this.etf.getLTP() * quantity;
 
         this.netProfit = netInvested - currentValue;
         this.netProfitPercentage = (netProfit / netInvested) * 100;
@@ -57,11 +59,11 @@ public class Investment {
     }
 
     public Double sell(int quantity) {
-        return sell(quantity, this.stock.getLTP());
+        return sell(quantity, this.etf.getLTP());
     }
 
     public Double sell() {
-        return sell(this.quantity, this.stock.getLTP());
+        return sell(this.quantity, this.etf.getLTP());
     }
 
     public void buy(int quantity, Double buyPrice) {
@@ -74,7 +76,7 @@ public class Investment {
     }
 
     public void buy(int quantity) {
-        buy(quantity, this.stock.getLTP());
+        buy(quantity, this.etf.getLTP());
     }
 
 

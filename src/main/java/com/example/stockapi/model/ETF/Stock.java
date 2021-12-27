@@ -1,18 +1,22 @@
-package com.example.stockapi.model;
+package com.example.stockapi.model.ETF;
 
 import com.example.stockapi.dao.StockDataService;
+import com.example.stockapi.model.Exchange;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
-@Data
-public class Stock {
+@Getter
+@Setter
+@ToString
+public class Stock implements ETF {
 
-    static StockDataService stockDataService = new StockDataService();
+    static StockDataService stockDataService;
 
-    @JsonIgnore
     private final String id;
 
     private final String name;
@@ -64,7 +68,7 @@ public class Stock {
     }
 
     public static Stock getStockFromSymbol(String symbol) {
-        return getStockFromSymbolAndExchange(symbol, "NS");
+        return getStockFromSymbolAndExchange(symbol, "NSE");
     }
 
     @Override
@@ -79,4 +83,5 @@ public class Stock {
     public int hashCode() {
         return Objects.hash(getId());
     }
+
 }
