@@ -1,14 +1,12 @@
 package com.example.stockapi.model.ETF;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class Cryptocurrency implements ETF{
 
     private final String name;

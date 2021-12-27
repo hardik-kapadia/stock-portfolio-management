@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 
@@ -14,7 +15,7 @@ import java.util.Objects;
 @ToString
 public class Stock implements ETF {
 
-    static StockDataService stockDataService = new StockDataService();
+    static StockDataService stockDataService;
 
     private final String id;
 
