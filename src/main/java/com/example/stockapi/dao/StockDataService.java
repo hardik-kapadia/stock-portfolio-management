@@ -85,6 +85,7 @@ public class StockDataService {
         return restTemplate.getForEntity(uri, JsonNode.class, params);
     }
 
+    // Updates the details of the stock... i.e. updates the LTP, open, low, high, close, etc.
     public void updateStock(Stock stock) throws ApiException {
 
         ResponseEntity<JsonNode> responseEntity = getResponseForQuote(stock.getSymbol());
@@ -116,12 +117,14 @@ public class StockDataService {
 
     }
 
+    // Converts a Stock SearchResult to a Stock.
     public Stock getStockFromStockSearchResult(StockSearchResult stockSearchResult) throws ApiException {
         Stock stock = new Stock(stockSearchResult.getSymbol(), stockSearchResult.getName());
         updateStock(stock);
         return stock;
     }
 
+    // gets the name (i.e. Company name) for a certain stock (as opposed to it's symbol on the ETF)
     public void setNameFor(Stock stock) throws ApiException {
 
         ResponseEntity<JsonNode> responseEntity = getResponseForSearching(stock.getSymbol().split("\\.")[0]);
@@ -150,6 +153,7 @@ public class StockDataService {
 
     }
 
+    // Return a List of intermediate Stock objects that match the query
     public List<StockSearchResult> searchForSymbol(String query) throws ApiException {
 
         ResponseEntity<JsonNode> responseEntity = getResponseForSearching(query.strip());
@@ -167,6 +171,7 @@ public class StockDataService {
                 result = result.stream().filter(ssr -> ssr.getRegion().contains("India")).toList();
                 System.out.println("result: " + result);
 
+                System.out.println("Returning list: " + result);
                 return result;
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
@@ -178,6 +183,7 @@ public class StockDataService {
 
     }
 
+    // Get a stock from a symbol.
     public Stock getStockFromSymbol(String symbol) throws ApiException, IllegalArgumentException {
 
         ResponseEntity<JsonNode> responseEntity = getResponseForSearching(symbol.split("\\.")[0]);
@@ -197,7 +203,7 @@ public class StockDataService {
                     throw new IllegalArgumentException();
 
                 for (StockSearchResult ssr : result) {
-                    if (ssr.getMatchScore() >= 9.9) {
+                    if (ssr.getMatchScore() >= 0.75) {
                         return getStockFromStockSearchResult(ssr);
                     }
                 }
@@ -208,6 +214,7 @@ public class StockDataService {
         throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
     }
 
+    // Helper method to print a Response from the API.
     public static void printResponse(ResponseEntity<?> responseEntity) {
 
         System.out.println("--------------Status--------------");

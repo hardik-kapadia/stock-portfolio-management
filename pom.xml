@@ -48,11 +48,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.crazzyghost</groupId>
-            <artifactId>alphavantage-java</artifactId>
-            <version>1.6.1</version>
-        </dependency>
 
         <dependency>
             <groupId>org.mockito</groupId>

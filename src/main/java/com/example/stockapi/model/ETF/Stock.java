@@ -11,10 +11,11 @@ import java.util.Objects;
 @ToString
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@NoArgsConstructor
 public class Stock implements ETF {
 
     @JsonAlias("01. symbol")
-    private final String symbol;
+    private String symbol;
 
     private String name;
 
@@ -34,8 +35,7 @@ public class Stock implements ETF {
     private Double low;
 
     public Stock(String symbol) {
-        this.symbol = symbol;
-        this.name = this.symbol.split("\\.")[0];
+        this(symbol, symbol.split("\\.")[0]);
     }
 
     public Stock(String symbol, String name) {
