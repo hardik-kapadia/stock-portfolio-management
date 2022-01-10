@@ -1,27 +1,40 @@
 package com.example.stockapi.model;
 
-import com.example.stockapi.model.ETF.ETF;
-import com.example.stockapi.model.ETF.Stock;
-import lombok.Data;
-import lombok.NonNull;
+import com.example.stockapi.model.stock.Stock;
+import lombok.*;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
-@Data
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@NoArgsConstructor
+@Entity
 public class User {
 
     @NonNull
     private String name;
+
+    @Column(unique = true)
     private String email;
+
+    @Column(unique = true)
     private String mobileNumber;
 
     @NonNull
+    @Id
     private String accountNumber;
 
     private Double netInvested;
     private Double netPortfolioValue;
 
+    @OneToMany
+    @JoinColumn(name = "investments", referencedColumnName = "id")
+    @ToString.Exclude
     private List<Investment> investments;
 
     private Double unrealizedGains;
@@ -61,20 +74,79 @@ public class User {
     public void invest(Investment investment) {
         this.investments.add(investment);
         this.netInvested += investment.getNetInvested();
-        this.unrealizedGains += investment.getNetProfit();
+        this.netPortfolioValue += investment.getNetInvested();
+        refresh();
     }
 
-    public void buy(ETF etf, Double buyPrice) {
+    public void refresh() {
 
+        AtomicReference<Double> tempUnrealizedGains = new AtomicReference<>(0.0);
+        AtomicReference<Double> tempPortfolioValue = new AtomicReference<>(0.0);
+
+        investments.forEach(i ->
+        {
+            tempUnrealizedGains.updateAndGet(v -> v + i.getNetProfit());
+            tempUnrealizedGains.updateAndGet(v -> v + i.getCurrentValue());
+        });
+
+        this.setUnrealizedGains(tempUnrealizedGains.get());
+        this.setNetPortfolioValue(tempPortfolioValue.get());
+
+    }
+
+    public void setUnrealizedGains(Double unrealizedGains) {
+        this.unrealizedGains = unrealizedGains;
+        this.setUnrealizedGainsPercentage(unrealizedGains * 100 / this.netInvested);
+    }
+
+    public void buy(Stock stock, Integer quantity, Double buyPrice) {
 
         Investment previousInvestment = null;
 
         for (Investment investment : investments)
-            if (investment.getEtf().equals(etf)) {
+            if (investment.getStock().equals(stock)) {
                 previousInvestment = investment;
                 break;
             }
 
+        if (previousInvestment != null)
+            previousInvestment.buy(quantity, buyPrice);
+        else
+            this.invest(new Investment(stock, quantity, buyPrice));
+
+        refresh();
+
+    }
+
+    public void sell(Stock stock, Integer quantity, Double sellingPrice) throws IllegalArgumentException {
+
+        Investment ownedInvestment = null;
+
+        for (Investment investment : investments)
+            if (investment.getStock().equals(stock)) {
+                ownedInvestment = investment;
+                break;
+            }
+
+        if (ownedInvestment == null)
+            throw new IllegalArgumentException("You don't own this stock");
+
+        if (quantity > ownedInvestment.getQuantity())
+            throw new IllegalArgumentException("You don't own enough quantity of this stock");
+
+
+        if (ownedInvestment.getQuantity() == 0)
+            this.investments.remove(ownedInvestment);
+
+        Double investmentWithdrawn = this.netInvested - ownedInvestment.getNetInvested();
+
+        this.netInvested -= ownedInvestment.getNetInvested();
+
+        refresh();
+
+        Double investedinOwned = ownedInvestment.getNetInvested();
+
+        this.realizedGains += ownedInvestment.sell(quantity, sellingPrice) - ownedInvestment.getNetInvested();
 
     }
 

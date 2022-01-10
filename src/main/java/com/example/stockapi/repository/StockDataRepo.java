@@ -1,15 +1,15 @@
-package com.example.stockapi.dao;
+package com.example.stockapi.repository;
 
 import com.example.stockapi.config.StockApiConfig;
 import com.example.stockapi.exception.ApiException;
-import com.example.stockapi.model.ETF.Stock;
-import com.example.stockapi.model.ETF.StockSearchResult;
+import com.example.stockapi.model.stock.Stock;
+import com.example.stockapi.model.stock.StockSearchResult;
 import com.example.stockapi.service.MyJsonMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Component
-public class StockDataService {
+@Repository
+public class StockDataRepo {
 
     private final static String baseUrl = "https://www.alphavantage.co/query";
 
@@ -28,7 +28,7 @@ public class StockDataService {
     MyJsonMapper myJsonMapper;
 
     @Autowired
-    public StockDataService(StockApiConfig stockApiConfig, MyJsonMapper myJsonMapper) {
+    public StockDataRepo(StockApiConfig stockApiConfig, MyJsonMapper myJsonMapper) {
 
         this.stockApiConfig = stockApiConfig;
         this.myJsonMapper = myJsonMapper;
@@ -37,7 +37,7 @@ public class StockDataService {
     }
 
     // for testing purposes
-    public StockDataService(String API_KEY) {
+    public StockDataRepo(String API_KEY) {
 
         this.stockApiConfig = new StockApiConfig(API_KEY);
         this.myJsonMapper = new MyJsonMapper();
@@ -140,7 +140,7 @@ public class StockDataService {
             try {
                 List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
                 for (StockSearchResult ssr : result) {
-                    if (ssr.getMatchScore() >= 9.9) {
+                    if (ssr.getMatchScore() >= 0.75) {
                         stock.setName(ssr.getName());
                         break;
                     }

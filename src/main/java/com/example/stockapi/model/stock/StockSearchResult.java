@@ -1,4 +1,4 @@
-package com.example.stockapi.model.ETF;
+package com.example.stockapi.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

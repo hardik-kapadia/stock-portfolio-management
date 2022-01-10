@@ -1,7 +1,7 @@
 package com.example.stockapi.service;
 
-import com.example.stockapi.model.ETF.Stock;
-import com.example.stockapi.model.ETF.StockSearchResult;
+import com.example.stockapi.model.stock.Stock;
+import com.example.stockapi.model.stock.StockSearchResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

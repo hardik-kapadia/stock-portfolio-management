@@ -1,9 +1,9 @@
 package com.example.stockapi.controller;
 
-import com.example.stockapi.dao.StockDataService;
+import com.example.stockapi.repository.StockDataRepo;
 import com.example.stockapi.exception.ApiException;
-import com.example.stockapi.model.ETF.Stock;
-import com.example.stockapi.model.ETF.StockSearchResult;
+import com.example.stockapi.model.stock.Stock;
+import com.example.stockapi.model.stock.StockSearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +19,21 @@ import java.util.List;
 public class StockController {
 
     // Used to fetch Data from the API and then convert it to a preferred format
-    StockDataService stockDataService;
+    StockDataRepo stockDataRepo;
 
     @Autowired
-    public StockController(StockDataService stockDataService) {
-        this.stockDataService = stockDataService;
+    public StockController(StockDataRepo stockDataRepo) {
+        this.stockDataRepo = stockDataRepo;
     }
 
     @GetMapping("/search/{stockName}")
     public ResponseEntity<List<StockSearchResult>> searchForStock(@PathVariable String stockName) throws ApiException {
-        return new ResponseEntity<>(this.stockDataService.searchForSymbol(stockName), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockDataRepo.searchForSymbol(stockName), HttpStatus.OK);
     }
 
     @GetMapping("/stock/{symbol}")
     public ResponseEntity<Stock> getStock(@PathVariable String symbol) throws ApiException {
-        return new ResponseEntity<>(this.stockDataService.getStockFromSymbol(symbol), HttpStatus.OK);
+        return new ResponseEntity<>(this.stockDataRepo.getStockFromSymbol(symbol), HttpStatus.OK);
     }
 
 }

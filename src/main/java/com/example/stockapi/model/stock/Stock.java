@@ -1,9 +1,11 @@
-package com.example.stockapi.model.ETF;
+package com.example.stockapi.model.stock;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.util.Objects;
 
 @Getter
@@ -12,8 +14,10 @@ import java.util.Objects;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
-public class Stock implements ETF {
+@Entity
+public class Stock{
 
+    @Id
     @JsonAlias("01. symbol")
     private String symbol;
 
@@ -48,11 +52,6 @@ public class Stock implements ETF {
         if (this == o) return true;
         if (!(o instanceof Stock stock)) return false;
         return this.getSymbol().equals(stock.getSymbol());
-    }
-
-    @Override
-    public Double getLTP() {
-        return this.LTP;
     }
 
     @Override

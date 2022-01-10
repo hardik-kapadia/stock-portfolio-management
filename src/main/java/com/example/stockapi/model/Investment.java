@@ -1,17 +1,26 @@
 package com.example.stockapi.model;
 
-import com.example.stockapi.model.ETF.ETF;
-import com.example.stockapi.model.ETF.Stock;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import com.example.stockapi.model.stock.Stock;
+import lombok.*;
 
-@Data
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@Entity
 public class Investment {
 
-    int id;
+    @Id
+    Integer id;
 
-    private final ETF etf;
+    @OneToOne
+    private Stock stock;
 
     private Integer quantity;
 
@@ -23,31 +32,27 @@ public class Investment {
 
     private Double averageBuyPrice;
 
-    // Assuming that the stock is bought at Market Price
-    public Investment(Stock stock, Integer quantity) {
-        this(stock, quantity, stock.getLTP());
-    }
-
     // Supplying just the Stock, the Quantity and the buy Price
-    public Investment(ETF etf, Integer quantity, Double averageBuyPrice) {
+    public Investment(Stock stock, Integer quantity, Double averageBuyPrice) {
 
-        this.etf = etf;
+        this.stock = stock;
 
         buy(quantity, averageBuyPrice);
 
         refresh();
     }
 
-    // Updates stock data
-    public void refresh() {
+    // Updates stock data based on latest LTP.
+    void refresh() {
 
-        this.currentValue = this.etf.getLTP() * quantity;
+        this.currentValue = this.stock.getLTP() * quantity;
 
         this.netProfit = netInvested - currentValue;
         this.netProfitPercentage = (netProfit / netInvested) * 100;
 
     }
 
+    // Sells the stock and returns the income from the sale
     public Double sell(int quantity, Double sellingPrice) {
 
         this.quantity -= quantity;
@@ -55,17 +60,20 @@ public class Investment {
 
         refresh();
 
-        return quantity * sellingPrice;
+        return (quantity * sellingPrice);
     }
 
+    // Selling the stock at Market price and returning the income from the sale
     public Double sell(int quantity) {
-        return sell(quantity, this.etf.getLTP());
+        return sell(quantity, this.stock.getLTP());
     }
 
+    // Selling all the stock at Market Price. and returning the income from the sale
     public Double sell() {
-        return sell(this.quantity, this.etf.getLTP());
+        return sell(this.quantity, this.stock.getLTP());
     }
 
+    // Buy a certain quantity of the stock at the specified price.
     public void buy(int quantity, Double buyPrice) {
         this.quantity += quantity;
         this.netInvested += quantity * buyPrice;
@@ -75,9 +83,8 @@ public class Investment {
 
     }
 
+    // Buy a certain quantity of the stock at the Market Price.
     public void buy(int quantity) {
-        buy(quantity, this.etf.getLTP());
+        buy(quantity, this.stock.getLTP());
     }
-
-
 }
