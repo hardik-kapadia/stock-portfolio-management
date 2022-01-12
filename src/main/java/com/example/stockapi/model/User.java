@@ -1,7 +1,10 @@
 package com.example.stockapi.model;
 
 import com.example.stockapi.model.stock.Stock;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
+@Component
 public class User {
 
     @NonNull
@@ -32,9 +36,9 @@ public class User {
     private Double netInvested;
     private Double netPortfolioValue;
 
-    @OneToMany
-    @JoinColumn(name = "investments", referencedColumnName = "id")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Investment> investments;
 
     private Double unrealizedGains;
@@ -75,6 +79,7 @@ public class User {
         this.investments.add(investment);
         this.netInvested += investment.getNetInvested();
         this.netPortfolioValue += investment.getNetInvested();
+        this.investments.add(investment);
         refresh();
     }
 
@@ -101,6 +106,8 @@ public class User {
 
     public void buy(Stock stock, Integer quantity, Double buyPrice) {
 
+        System.out.println(this + " buying " + quantity + " of " + stock + " at " + buyPrice);
+
         Investment previousInvestment = null;
 
         for (Investment investment : investments)
@@ -112,9 +119,11 @@ public class User {
         if (previousInvestment != null)
             previousInvestment.buy(quantity, buyPrice);
         else
-            this.invest(new Investment(stock, quantity, buyPrice));
+            this.invest(new Investment(stock, quantity, buyPrice, this));
 
         refresh();
+
+        System.out.println("After buying: investments: " + this.investments);
 
     }
 

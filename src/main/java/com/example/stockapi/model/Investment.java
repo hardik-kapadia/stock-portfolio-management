@@ -1,11 +1,10 @@
 package com.example.stockapi.model;
 
 import com.example.stockapi.model.stock.Stock;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 
 @AllArgsConstructor
@@ -17,9 +16,16 @@ import javax.persistence.OneToOne;
 public class Investment {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     Integer id;
 
-    @OneToOne
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @ToString.Exclude
+    @JsonBackReference
+    private User user;
+
+    @OneToOne(cascade = CascadeType.ALL)
     private Stock stock;
 
     private Integer quantity;
@@ -33,9 +39,16 @@ public class Investment {
     private Double averageBuyPrice;
 
     // Supplying just the Stock, the Quantity and the buy Price
-    public Investment(Stock stock, Integer quantity, Double averageBuyPrice) {
+    public Investment(Stock stock, Integer quantity, Double averageBuyPrice, User user) {
 
+        this.user = user;
         this.stock = stock;
+        this.quantity = 0;
+        this.netInvested = 0.0;
+        this.currentValue = 0.0;
+        this.netProfit = 0.0;
+        this.netProfitPercentage = 0.0;
+        this.averageBuyPrice = 0.0;
 
         buy(quantity, averageBuyPrice);
 
@@ -75,6 +88,7 @@ public class Investment {
 
     // Buy a certain quantity of the stock at the specified price.
     public void buy(int quantity, Double buyPrice) {
+
         this.quantity += quantity;
         this.netInvested += quantity * buyPrice;
         this.averageBuyPrice = this.netInvested / this.quantity;

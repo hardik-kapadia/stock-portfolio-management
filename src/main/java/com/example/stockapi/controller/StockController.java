@@ -28,6 +28,8 @@ public class StockController {
 
     @GetMapping("/search/{stockName}")
     public ResponseEntity<List<StockSearchResult>> searchForStock(@PathVariable String stockName) throws ApiException {
+
+        System.out.println("Looking for: " + stockName);
         return new ResponseEntity<>(this.stockDataRepo.searchForSymbol(stockName), HttpStatus.OK);
     }
 

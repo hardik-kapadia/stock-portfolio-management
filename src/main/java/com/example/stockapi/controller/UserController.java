@@ -43,6 +43,26 @@ public class UserController {
                 e.printStackTrace();
             }
         });
+
+        user.refresh();
+    }
+
+    private Investment getInvestmentFromId(User user, Integer investmentId) {
+        Investment investment = null;
+
+        List<Investment> userInvestments = user.getInvestments();
+
+        System.out.println("User: " + user + " -> Updating investments: " + userInvestments);
+
+
+        for (Investment userInvestment : userInvestments) {
+            if (userInvestment.getId().intValue() == investmentId.intValue()) {
+                investment = userInvestment;
+                break;
+            }
+        }
+
+        return investment;
     }
 
     @GetMapping("/all")
@@ -50,10 +70,11 @@ public class UserController {
         return this.userDao.findAll();
     }
 
-    @GetMapping("/{userAccountNumber}/investments/")
+    @GetMapping("/{userAccountNumber}/investments")
     public List<Investment> getUserInvestments(@PathVariable String userAccountNumber) {
 
         User user = this.getUserFromNumber(userAccountNumber);
+
 
         this.updateUserInvestments(user);
 
@@ -66,28 +87,11 @@ public class UserController {
         User user = this.getUserFromNumber(userAccountNumber);
 
         this.updateUserInvestments(user);
-
         return user;
 
     }
 
-    private Investment getInvestmentFromId(User user, Integer investmentId) {
-        Investment investment = null;
-
-        List<Investment> userInvestments = user.getInvestments();
-
-        for (Investment userInvestment : userInvestments) {
-            if (userInvestment.getId().intValue() == investmentId.intValue()) {
-                investment = userInvestment;
-                break;
-            }
-        }
-
-        return investment;
-    }
-
-
-    @PostMapping("/{userAccountNumber}/sell/")
+    @PostMapping("/{userAccountNumber}/sell")
     public void sellStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
@@ -111,14 +115,16 @@ public class UserController {
         Double sellingPrice = Double.parseDouble(payload.getOrDefault("sellingPrice", investment.getStock().getLTP().toString()));
 
         investment.sell(quantity, sellingPrice);
+        user.refresh();
 
         userDao.saveAndFlush(user);
 
-
     }
 
-    @PostMapping("/{userAccountNumber}/buy/")
+    @PostMapping("/{userAccountNumber}/buy")
     public void buyStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
+
+        System.out.println("buying for: User account number: " + userAccountNumber);
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
 
@@ -128,7 +134,7 @@ public class UserController {
 
         Stock stock;
         int quantity;
-        double buyPrice = -1 * 1.0;
+        double buyPrice;
 
         if (tempInvestmentId != null) {
 
@@ -143,9 +149,6 @@ public class UserController {
 
             quantity = Integer.parseInt(payload.getOrDefault("quantity", investment.getQuantity().toString()));
 
-            investment.buy(quantity, buyPrice);
-
-            userDao.saveAndFlush(user);
 
         } else {
             String stockSymbol = payload.getOrDefault("stockSymbol", null);
@@ -157,6 +160,8 @@ public class UserController {
                 stock = this.stockDataRepo.getStockFromSymbol(stockSymbol);
                 quantity = Integer.parseInt(payload.getOrDefault("quantity", "0"));
 
+                System.out.println("Succesfully set: " + stock + " with q: " + quantity);
+
             } catch (ApiException e) {
                 throw new IllegalArgumentException("Invalid stock symbol");
             }
@@ -166,6 +171,18 @@ public class UserController {
 
         user.buy(stock, quantity, buyPrice);
 
+        userDao.saveAndFlush(user);
+    }
+
+    @PostMapping("/add")
+    public void addUser(@RequestBody User user) {
+        User u = new User(user.getName(), user.getEmail(), user.getMobileNumber(), user.getAccountNumber());
+        userDao.saveAndFlush(u);
+    }
+
+    @PostMapping("/delete")
+    public void deleteUser(@RequestParam String userAccountNumber) {
+        userDao.deleteById(userAccountNumber);
     }
 
 }

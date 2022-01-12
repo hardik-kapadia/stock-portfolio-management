@@ -1,0 +1,7 @@
+{
+    "name":"HK",
+    "email":"abc@xyz.com",
+    "mobileNumber":"8879563067",
+    "accountNumber":"ABCDEFGHI"
+}
+
