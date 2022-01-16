@@ -202,11 +202,19 @@ public class StockDataRepo {
                 if (result.size() == 0)
                     throw new IllegalArgumentException();
 
+                StockSearchResult bestMatch = result.get(0);
+                double bestScore = bestMatch.getMatchScore();
+
                 for (StockSearchResult ssr : result) {
-                    if (ssr.getMatchScore() >= 0.75) {
-                        return getStockFromStockSearchResult(ssr);
+                    if (ssr.getMatchScore() >= bestScore) {
+                        bestMatch = ssr;
+                        bestScore = ssr.getMatchScore();
                     }
                 }
+
+                return getStockFromStockSearchResult(bestMatch);
+
+
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }

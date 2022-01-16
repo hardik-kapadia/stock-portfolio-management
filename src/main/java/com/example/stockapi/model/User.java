@@ -91,7 +91,7 @@ public class User {
         investments.forEach(i ->
         {
             tempUnrealizedGains.updateAndGet(v -> v + i.getNetProfit());
-            tempUnrealizedGains.updateAndGet(v -> v + i.getCurrentValue());
+            tempPortfolioValue.updateAndGet(v -> v + i.getCurrentValue());
         });
 
         this.setUnrealizedGains(tempUnrealizedGains.get());

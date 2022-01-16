@@ -7,6 +7,7 @@ import com.example.stockapi.model.stock.Stock;
 import com.example.stockapi.repository.StockDataRepo;
 import com.example.stockapi.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,7 +21,6 @@ public class UserController {
     StockDataRepo stockDataRepo;
     UserDao userDao;
 
-    @Autowired
     public UserController(StockDataRepo stockDataRepo, UserDao userDao) {
         this.stockDataRepo = stockDataRepo;
         this.userDao = userDao;
@@ -122,7 +122,7 @@ public class UserController {
     }
 
     @PostMapping("/{userAccountNumber}/buy")
-    public void buyStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> buyStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
 
         System.out.println("buying for: User account number: " + userAccountNumber);
 
@@ -143,7 +143,7 @@ public class UserController {
             Investment investment = this.getInvestmentFromId(user, investmentId);
 
             if (investment == null)
-                throw new IllegalArgumentException("Invalid investment id");
+                return ResponseEntity.badRequest().body("Invalid investment Id");
 
             stock = investment.getStock();
 
@@ -154,7 +154,7 @@ public class UserController {
             String stockSymbol = payload.getOrDefault("stockSymbol", null);
 
             if (stockSymbol == null)
-                throw new IllegalArgumentException("No symbol provided");
+                return ResponseEntity.badRequest().body("stock symbol/ investment Id required");
 
             try {
                 stock = this.stockDataRepo.getStockFromSymbol(stockSymbol);
@@ -163,7 +163,7 @@ public class UserController {
                 System.out.println("Succesfully set: " + stock + " with q: " + quantity);
 
             } catch (ApiException e) {
-                throw new IllegalArgumentException("Invalid stock symbol");
+                return ResponseEntity.badRequest().body("stock symbol/ investment Id required");
             }
         }
 
@@ -172,6 +172,8 @@ public class UserController {
         user.buy(stock, quantity, buyPrice);
 
         userDao.saveAndFlush(user);
+
+        return ResponseEntity.ok("Stock purchased successfully");
     }
 
     @PostMapping("/add")
