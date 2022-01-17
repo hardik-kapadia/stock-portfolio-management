@@ -6,7 +6,6 @@ import com.example.stockapi.model.Investment;
 import com.example.stockapi.model.stock.Stock;
 import com.example.stockapi.repository.StockDataRepo;
 import com.example.stockapi.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

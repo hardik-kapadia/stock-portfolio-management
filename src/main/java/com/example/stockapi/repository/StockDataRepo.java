@@ -36,16 +36,6 @@ public class StockDataRepo {
 
     }
 
-    // for testing purposes
-    public StockDataRepo(String API_KEY) {
-
-        this.stockApiConfig = new StockApiConfig(API_KEY);
-        this.myJsonMapper = new MyJsonMapper();
-
-        this.restTemplate = new RestTemplate();
-
-    }
-
 
     private ResponseEntity<JsonNode> getResponseForQuote(String symbol) {
 
