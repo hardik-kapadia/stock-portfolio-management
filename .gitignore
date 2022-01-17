@@ -5,7 +5,6 @@ target/
 !**/src/test/**/target/
 
 src/main/resources/secret.data
-
 *secret.data*
 
 ### STS ###
