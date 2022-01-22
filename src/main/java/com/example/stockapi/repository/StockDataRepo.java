@@ -50,7 +50,7 @@ public class StockDataRepo {
 
         params.put("function", "GLOBAL_QUOTE");
         params.put("symbol", symbol);
-        params.put("API_KEY", this.stockApiConfig.API_KEY);
+        params.put("API_KEY", this.stockApiConfig.getAPI_KEY());
         System.out.println("Final uri: " + uri);
 
         return restTemplate.getForEntity(uri, JsonNode.class, params);
@@ -69,7 +69,7 @@ public class StockDataRepo {
 
         params.put("function", "SYMBOL_SEARCH");
         params.put("keywords", keywords);
-        params.put("API_KEY", this.stockApiConfig.API_KEY);
+        params.put("API_KEY", this.stockApiConfig.getAPI_KEY());
         System.out.println("Final uri: " + uri);
 
         return restTemplate.getForEntity(uri, JsonNode.class, params);

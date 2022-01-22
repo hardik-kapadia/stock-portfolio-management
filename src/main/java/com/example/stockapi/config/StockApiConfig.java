@@ -11,6 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Setter
 public class StockApiConfig {
 
-    public String API_KEY;
+    private String API_KEY;
 
 }

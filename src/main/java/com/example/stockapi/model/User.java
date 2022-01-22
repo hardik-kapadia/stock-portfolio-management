@@ -3,8 +3,6 @@ package com.example.stockapi.model;
 import com.example.stockapi.model.stock.Stock;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -17,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
-@Component
 public class User {
 
     @NonNull
