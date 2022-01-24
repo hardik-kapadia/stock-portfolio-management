@@ -6,6 +6,7 @@ import com.example.stockapi.model.Investment;
 import com.example.stockapi.model.stock.Stock;
 import com.example.stockapi.repository.StockDataRepo;
 import com.example.stockapi.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +21,7 @@ public class UserController {
     StockDataRepo stockDataRepo;
     UserDao userDao;
 
+    @Autowired
     public UserController(StockDataRepo stockDataRepo, UserDao userDao) {
         this.stockDataRepo = stockDataRepo;
         this.userDao = userDao;
@@ -32,6 +34,10 @@ public class UserController {
             throw new IllegalArgumentException("User doesn't exists");
 
         return optionalUser.get();
+    }
+
+    private User getAuthenticatedUser() {
+        return null;
     }
 
     private void updateUserInvestments(User user) {
@@ -177,8 +183,9 @@ public class UserController {
 
     @PostMapping("/add")
     public void addUser(@RequestBody User user) {
-        User u = new User(user.getName(), user.getEmail(), user.getMobileNumber(), user.getAccountNumber());
-        userDao.saveAndFlush(u);
+//        User u = new User(user.getName(), user.getEmail(), user.getMobileNumber(), user.getPassword(),user.getAccountNumber());
+        System.out.println("User rcvd: "+user);
+        userDao.saveAndFlush(user);
     }
 
     @PostMapping("/delete")
