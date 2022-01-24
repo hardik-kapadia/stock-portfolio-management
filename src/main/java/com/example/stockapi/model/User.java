@@ -1,11 +1,17 @@
 package com.example.stockapi.model;
 
 import com.example.stockapi.model.stock.Stock;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -15,7 +21,10 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
-public class User {
+public class User implements UserDetails {
+
+    @Serial
+    private static final long serialVersionUID = 2396654715019746670L;
 
     @NonNull
     private String name;
@@ -25,6 +34,8 @@ public class User {
 
     @Column(unique = true)
     private String mobileNumber;
+
+    private String password;
 
     @NonNull
     @Id
@@ -58,10 +69,12 @@ public class User {
         this.realizedGainsPercentage = realizedGainsPercentage;
     }
 
-    public User(@NonNull String name, String email, String mobileNumber, @NonNull String accountNumber) {
+    @JsonCreator
+    public User(@NonNull String name, String email, String mobileNumber, @NonNull String password, @NonNull String accountNumber) {
         this.name = name;
         this.email = email;
         this.mobileNumber = mobileNumber;
+        this.password = password;
         this.accountNumber = accountNumber;
         this.netInvested = 0.0;
         this.netPortfolioValue = 0.0;
@@ -156,5 +169,39 @@ public class User {
 
     }
 
+    @JsonIgnore
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
 
+    @JsonIgnore
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
