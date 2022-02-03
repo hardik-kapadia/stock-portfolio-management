@@ -1,18 +1,16 @@
 package com.example.stockapi.model;
 
+import com.example.stockapi.model.role.Role;
 import com.example.stockapi.model.stock.Stock;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
-import java.io.Serial;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
@@ -21,13 +19,15 @@ import java.util.concurrent.atomic.AtomicReference;
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Entity
-public class User implements UserDetails {
-
-    @Serial
-    private static final long serialVersionUID = 2396654715019746670L;
+@Table(name = "users")
+public class User {
 
     @NonNull
     private String name;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(unique = true)
     private String email;
@@ -37,12 +37,18 @@ public class User implements UserDetails {
 
     private String password;
 
-    @NonNull
-    @Id
+    @Column(unique = true)
     private String accountNumber;
 
     private Double netInvested;
     private Double netPortfolioValue;
+
+    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @ToString.Exclude
+    private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @ToString.Exclude
@@ -167,41 +173,5 @@ public class User implements UserDetails {
 
         this.realizedGains += ownedInvestment.sell(quantity, sellingPrice) - ownedInvestment.getNetInvested();
 
-    }
-
-    @JsonIgnore
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
-    }
-
-    @JsonIgnore
-    @Override
-    public String getUsername() {
-        return this.email;
-    }
-
-    @JsonIgnore
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @JsonIgnore
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @JsonIgnore
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @JsonIgnore
-    @Override
-    public boolean isEnabled() {
-        return true;
     }
 }
