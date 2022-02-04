@@ -65,9 +65,12 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        ResponseEntity<?> temp = ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body("{\"id\": " + userDetails.getId() + "\n\"Email\":  " + userDetails.getEmail() + ",\n\"role:" + roles + "}");
 
+        System.out.println("Resp: "+temp);
+
+        return temp;
     }
 
     @PostMapping("/signup")
@@ -143,7 +146,7 @@ public class AuthController {
 
         // Create new user's account
         User user = new User(payload.get("name"), payload.get("email"),
-                payload.get("mobilenumber"), payload.get("password"), payload.get("accountnumber"));
+                payload.get("mobilenumber"), encoder.encode(payload.get("password")), payload.get("accountnumber"));
 
         user.setRoles(roles);
         userRepository.save(user);
