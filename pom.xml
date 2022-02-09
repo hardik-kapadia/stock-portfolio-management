@@ -12,12 +12,12 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>StockAPI</artifactId>
+    <artifactId>smpm-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>StockAPI</name>
+    <name>Stock market portfolio Management backend</name>
 
-    <description>StockAPI</description>
+    <description> Complete backend as a REST API for a stock-market portfolio management application, with proper authentication, login/ logout system, live stock prices, etc. </description>
 
     <properties>
         <java.version>17</java.version>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-ui</artifactId>
-            <version>1.6.4</version>
+            <version>1.6.5</version>
         </dependency>
 
         <dependency>

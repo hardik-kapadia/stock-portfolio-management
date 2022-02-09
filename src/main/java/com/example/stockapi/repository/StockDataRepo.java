@@ -114,6 +114,7 @@ public class StockDataRepo {
         return stock;
     }
 
+    /*
     // gets the name (i.e. Company name) for a certain stock (as opposed to it's symbol on the ETF)
     public void setNameFor(Stock stock) throws ApiException {
 
@@ -142,6 +143,7 @@ public class StockDataRepo {
             throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
 
     }
+     */
 
     // Return a List of intermediate Stock objects that match the query
     public List<StockSearchResult> searchForSymbol(String query) throws ApiException {
