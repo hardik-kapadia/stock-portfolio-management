@@ -89,33 +89,36 @@ public class UserController {
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getAllUsers() {
         return this.userDao.findAll();
     }
 
-    @GetMapping("/{userAccountNumber}/investments")
-    public List<Investment> getUserInvestments(@PathVariable String userAccountNumber) {
+    @GetMapping("/investments")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public List<Investment> getUserInvestments(HttpServletRequest httpServletRequest) {
 
-        User user = this.getUserFromNumber(userAccountNumber);
-
+        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
         this.updateUserInvestments(user);
 
         return user.getInvestments();
     }
 
-    @GetMapping("/{userAccountNumber}/info")
-    public User getUserInfo(@PathVariable String userAccountNumber) {
+    @GetMapping("/info")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public User getUserInfo(HttpServletRequest httpServletRequest) {
 
-        User user = this.getUserFromNumber(userAccountNumber);
+        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
         this.updateUserInvestments(user);
         return user;
 
     }
 
-    @PostMapping("/{userAccountNumber}/sell")
-    public void sellStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
+    @PostMapping("/sell")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public void sellStock(HttpServletRequest httpServletRequest, @RequestBody Map<String, String> payload) {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
 
@@ -124,7 +127,7 @@ public class UserController {
 
         int investmentId = Integer.parseInt(tempInvestmentId);
 
-        User user = this.getUserFromNumber(userAccountNumber);
+        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
         this.updateUserInvestments(user);
 
@@ -144,14 +147,13 @@ public class UserController {
 
     }
 
-    @PostMapping("/{userAccountNumber}/buy")
-    public ResponseEntity<String> buyStock(@PathVariable String userAccountNumber, @RequestBody Map<String, String> payload) {
-
-        System.out.println("buying for: User account number: " + userAccountNumber);
+    @PostMapping("/buy")
+    @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
+    public ResponseEntity<String> buyStock(HttpServletRequest httpServletRequest, @RequestBody Map<String, String> payload) {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
 
-        User user = this.getUserFromNumber(userAccountNumber);
+        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
         this.updateUserInvestments(user);
 
@@ -197,18 +199,6 @@ public class UserController {
         userDao.saveAndFlush(user);
 
         return ResponseEntity.ok("Stock purchased successfully");
-    }
-
-    @PostMapping("/add")
-    public void addUser(@RequestBody User user) {
-//        User u = new User(user.getName(), user.getEmail(), user.getMobileNumber(), user.getPassword(),user.getAccountNumber());
-        System.out.println("User rcvd: " + user);
-        userDao.saveAndFlush(user);
-    }
-
-    @PostMapping("/delete")
-    public void deleteUser(@RequestParam String userAccountNumber) {
-        userDao.deleteById(userAccountNumber);
     }
 
 }

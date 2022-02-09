@@ -7,10 +7,12 @@ import com.example.stockapi.model.role.ERole;
 import com.example.stockapi.model.role.Role;
 import com.example.stockapi.security.jwt.JwtUtils;
 import com.example.stockapi.security.services.UserDetailsImpl;
+import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +71,7 @@ public class AuthController {
         ResponseEntity<?> temp = ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body("{\"id\": " + userDetails.getId() + "\n\"Email\":  " + userDetails.getEmail() + ",\n\"role:" + roles + "}");
 
-        System.out.println("Resp: "+temp);
+        System.out.println("Resp: " + temp);
 
         return temp;
     }
@@ -159,5 +162,25 @@ public class AuthController {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body("You've been signed out!");
+    }
+
+    @PostMapping("/delete")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest, @Valid @RequestBody Map<String, String> payload) {
+
+        if (!payload.containsKey("password"))
+            return ResponseEntity.badRequest().body("No password provided");
+
+        String p = encoder.encode(payload.get("password"));
+
+        User u = userRepository.getUserByEmail(jwtUtils.getUserNameFromJwtToken(jwtUtils.getJwtFromCookies(httpServletRequest))).get();
+
+        if (!p.equals(u.getPassword()))
+            return ResponseEntity.badRequest().body("Incorrect password");
+
+        userRepository.delete(u);
+
+        return ResponseEntity.ok("User with username: " + u.getEmail() + " was deleted successfully");
+
     }
 }
