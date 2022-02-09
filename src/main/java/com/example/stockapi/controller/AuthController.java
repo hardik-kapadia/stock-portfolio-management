@@ -7,7 +7,6 @@ import com.example.stockapi.model.role.ERole;
 import com.example.stockapi.model.role.Role;
 import com.example.stockapi.security.jwt.JwtUtils;
 import com.example.stockapi.security.services.UserDetailsImpl;
-import io.jsonwebtoken.Jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -123,7 +122,7 @@ public class AuthController {
                     } catch (RuntimeException re) {
                         roleRepository.save(new Role(ERole.ROLE_USER));
                         roleRepository.flush();
-                        userTempRole = roleRepository.findByName(ERole.ROLE_USER).get();
+                        userTempRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow();
                     }
 
 
@@ -137,7 +136,7 @@ public class AuthController {
                     } catch (RuntimeException re) {
                         roleRepository.save(new Role(ERole.ROLE_ADMIN));
                         roleRepository.flush();
-                        adminTempRole = roleRepository.findByName(ERole.ROLE_USER).get();
+                        adminTempRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow();
                     }
 
                     roles.add(adminTempRole);
@@ -173,7 +172,7 @@ public class AuthController {
 
         String p = encoder.encode(payload.get("password"));
 
-        User u = userRepository.getUserByEmail(jwtUtils.getUserNameFromJwtToken(jwtUtils.getJwtFromCookies(httpServletRequest))).get();
+        User u = userRepository.getUserByEmail(jwtUtils.getUserNameFromJwtToken(jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow();
 
         if (!p.equals(u.getPassword()))
             return ResponseEntity.badRequest().body("Incorrect password");
