@@ -114,37 +114,6 @@ public class StockDataRepo {
         return stock;
     }
 
-    /*
-    // gets the name (i.e. Company name) for a certain stock (as opposed to it's symbol on the ETF)
-    public void setNameFor(Stock stock) throws ApiException {
-
-        ResponseEntity<JsonNode> responseEntity = getResponseForSearching(stock.getSymbol().split("\\.")[0]);
-
-        System.out.println("Response: " + responseEntity);
-
-        if (responseEntity.getStatusCodeValue() / 100 == 2) {
-
-            printResponse(responseEntity);
-
-            JsonNode oj = Objects.requireNonNull(responseEntity.getBody()).get("bestMatches");
-
-            try {
-                List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
-                for (StockSearchResult ssr : result) {
-                    if (ssr.getMatchScore() >= 0.75) {
-                        stock.setName(ssr.getName());
-                        break;
-                    }
-                }
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-        } else
-            throw new ApiException(String.valueOf(responseEntity.getStatusCodeValue()));
-
-    }
-     */
-
     // Return a List of intermediate Stock objects that match the query
     public List<StockSearchResult> searchForSymbol(String query) throws ApiException {
 

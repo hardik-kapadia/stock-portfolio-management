@@ -28,10 +28,8 @@ public class Role {
     @Override
     public boolean equals(Object o) {
 
-        if (!(o instanceof Role))
+        if (!(o instanceof Role r))
             return false;
-
-        Role r = (Role) o;
 
         return r.getName().equals(this.getName());
 
