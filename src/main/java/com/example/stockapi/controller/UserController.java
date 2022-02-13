@@ -64,13 +64,13 @@ public class UserController {
 
         User u = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
-        System.out.println("User: "+u);
+        System.out.println("User: " + u);
 
         return ResponseEntity.ok(u.getRoles().contains(new Role(ERole.ROLE_USER)));
 
     }
 
-    private Investment getInvestmentFromId(User user, Integer investmentId) {
+    private Optional<Investment> getInvestmentFromId(User user, Integer investmentId) {
         Investment investment = null;
 
         List<Investment> userInvestments = user.getInvestments();
@@ -85,7 +85,7 @@ public class UserController {
             }
         }
 
-        return investment;
+        return Optional.ofNullable(investment);
     }
 
     @GetMapping("/all")
@@ -118,32 +118,47 @@ public class UserController {
 
     @PostMapping("/sell")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public void sellStock(HttpServletRequest httpServletRequest, @RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> sellStock(HttpServletRequest httpServletRequest, @RequestBody Map<String, String> payload) {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
 
         if (tempInvestmentId == null)
             throw new IllegalArgumentException("No investment id provided");
 
-        int investmentId = Integer.parseInt(tempInvestmentId);
-
         User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
 
         this.updateUserInvestments(user);
 
-        Investment investment = this.getInvestmentFromId(user, investmentId);
+        int investmentId = Integer.parseInt(tempInvestmentId);
 
-        if (investment == null)
-            throw new IllegalArgumentException("Invalid investment id");
+        Optional<Investment> optionalInvestment = this.getInvestmentFromId(user, investmentId);
 
-        int quantity = Integer.parseInt(payload.getOrDefault("quantity", investment.getQuantity().toString()));
+        if(optionalInvestment.isPresent()){
 
-        Double sellingPrice = Double.parseDouble(payload.getOrDefault("sellingPrice", investment.getStock().getLTP().toString()));
+            Investment investment = optionalInvestment.get();
 
-        investment.sell(quantity, sellingPrice);
-        user.refresh();
+            int quantity = Integer.parseInt(payload.getOrDefault("quantity", investment.getQuantity().toString()));
+
+            Double sellingPrice = Double.parseDouble(payload.getOrDefault("sellingPrice", investment.getStock().getLTP().toString()));
+
+            user.sell(investment, quantity, sellingPrice);
+
+        } else {
+
+            String stockSymbol = payload.getOrDefault("stockSymbol", null);
+
+            if (stockSymbol == null)
+                return ResponseEntity.badRequest().body("stock symbol/ investment Id required");
+
+
+        }
+
+        if (optionalInvestment.isEmpty())
+            return ResponseEntity.badRequest().body("Invalid investment Id");
 
         userDao.saveAndFlush(user);
+
+        return ResponseEntity.ok("Stock purchased successfully");
 
     }
 
@@ -165,10 +180,12 @@ public class UserController {
 
             int investmentId = Integer.parseInt(tempInvestmentId);
 
-            Investment investment = this.getInvestmentFromId(user, investmentId);
+            Optional<Investment> optionalInvestment = this.getInvestmentFromId(user, investmentId);
 
-            if (investment == null)
+            if (optionalInvestment.isEmpty())
                 return ResponseEntity.badRequest().body("Invalid investment Id");
+
+            Investment investment = optionalInvestment.get();
 
             stock = investment.getStock();
 

@@ -43,7 +43,7 @@ public class User {
     private Double netInvested;
     private Double netPortfolioValue;
 
-    @ManyToMany(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -159,19 +159,40 @@ public class User {
         if (quantity > ownedInvestment.getQuantity())
             throw new IllegalArgumentException("You don't own enough quantity of this stock");
 
+        sell(ownedInvestment, quantity, sellingPrice);
 
-        if (ownedInvestment.getQuantity() == 0)
-            this.investments.remove(ownedInvestment);
+    }
 
-        Double investmentWithdrawn = this.netInvested - ownedInvestment.getNetInvested();
+    public void sell(int investmentId, Integer quantity, Double sellingPrice) throws IllegalArgumentException {
 
-        this.netInvested -= ownedInvestment.getNetInvested();
+        Investment ownedInvestment = null;
+
+        for (Investment investment : investments)
+            if (investment.getId().equals(investmentId)) {
+                ownedInvestment = investment;
+                break;
+            }
+
+        if (ownedInvestment == null)
+            throw new IllegalArgumentException("You don't own this stock");
+
+        if (quantity > ownedInvestment.getQuantity())
+            throw new IllegalArgumentException("You don't own enough quantity of this stock");
+
+        sell(ownedInvestment, quantity, sellingPrice);
+
+    }
+
+    public void sell(Investment investment, Integer quantity, Double sellingPrice) {
+
+        this.netInvested -= investment.getNetInvested();
+
+        this.realizedGains += investment.sell(quantity, sellingPrice) - investment.getNetInvested();
+
+        if (investment.getQuantity() == 0)
+            this.investments.remove(investment);
 
         refresh();
-
-        Double investedinOwned = ownedInvestment.getNetInvested();
-
-        this.realizedGains += ownedInvestment.sell(quantity, sellingPrice) - ownedInvestment.getNetInvested();
 
     }
 }
