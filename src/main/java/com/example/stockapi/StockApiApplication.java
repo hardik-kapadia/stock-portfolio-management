@@ -10,5 +10,4 @@ public class StockApiApplication {
         SpringApplication.run(StockApiApplication.class, args);
     }
 
-
 }

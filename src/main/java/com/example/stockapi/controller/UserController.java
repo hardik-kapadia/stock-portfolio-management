@@ -62,7 +62,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     private ResponseEntity<Boolean> hasAuthority(HttpServletRequest httpServletRequest) {
 
-        User u = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
+        User u = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         System.out.println("User: " + u);
 
@@ -98,7 +98,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public List<Investment> getUserInvestments(HttpServletRequest httpServletRequest) {
 
-        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
+        User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
 
@@ -109,7 +109,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public User getUserInfo(HttpServletRequest httpServletRequest) {
 
-        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
+        User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
         return user;
@@ -125,7 +125,7 @@ public class UserController {
         if (tempInvestmentId == null)
             throw new IllegalArgumentException("No investment id provided");
 
-        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
+        User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
 
@@ -133,7 +133,7 @@ public class UserController {
 
         Optional<Investment> optionalInvestment = this.getInvestmentFromId(user, investmentId);
 
-        if(optionalInvestment.isPresent()){
+        if (optionalInvestment.isPresent()) {
 
             Investment investment = optionalInvestment.get();
 
@@ -168,7 +168,7 @@ public class UserController {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
 
-        User user = this.userDao.getById(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest)));
+        User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
 

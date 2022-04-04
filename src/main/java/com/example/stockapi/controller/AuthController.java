@@ -37,6 +37,7 @@ public class AuthController {
 
     @Autowired
     UserDao userRepository;
+
     @Autowired
     RoleDao roleRepository;
 
@@ -124,7 +125,6 @@ public class AuthController {
                         roleRepository.flush();
                         userTempRole = roleRepository.findByName(ERole.ROLE_USER).orElseThrow();
                     }
-
 
                     roles.add(userTempRole);
 

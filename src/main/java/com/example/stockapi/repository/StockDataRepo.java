@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Repository
 public class StockDataRepo {
@@ -129,7 +130,7 @@ public class StockDataRepo {
 
             try {
                 List<StockSearchResult> result = this.myJsonMapper.getAllFromNode(oj);
-                result = result.stream().filter(ssr -> ssr.getRegion().contains("India")).toList();
+                result = result.stream().filter(ssr -> ssr.getRegion().contains("India")).collect(Collectors.toList());
                 System.out.println("result: " + result);
 
                 System.out.println("Returning list: " + result);
