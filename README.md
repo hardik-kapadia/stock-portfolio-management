@@ -9,7 +9,7 @@ Technologies:
   - Spring Data
   - Spring Open API documentation
 - MySQL with JPA (Credentials needed to run API)
-- JWT tokens
+- JWT authentication
 - AlphaVantage API (custom key needed in env to connect) (currently migrating to KiteConnect 3)
 
 Swagger:
