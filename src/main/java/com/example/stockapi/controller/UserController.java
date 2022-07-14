@@ -45,7 +45,6 @@ public class UserController {
         return optionalUser.get();
     }
 
-
     private void updateUserInvestments(User user) {
         user.getInvestments().forEach(i -> {
             try {
@@ -56,6 +55,12 @@ public class UserController {
         });
 
         user.refresh();
+    }
+
+    @GetMapping("/refreshUser")
+    public void refreshUserInvestments(HttpServletRequest httpServletRequest) {
+        User u = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
+        updateUserInvestments(u);
     }
 
     @GetMapping("/checkRole")
@@ -112,6 +117,7 @@ public class UserController {
         User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
+
         return user;
 
     }

@@ -7,8 +7,11 @@ import com.example.stockapi.model.role.ERole;
 import com.example.stockapi.model.role.Role;
 import com.example.stockapi.security.jwt.JwtUtils;
 import com.example.stockapi.security.services.UserDetailsImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,10 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -47,8 +47,11 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> payload) {
+    @Autowired
+    ObjectMapper objectMapper;
+
+    @PostMapping(value = "/signin",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> payload) throws JsonProcessingException {
 
         if (!payload.containsKey("username"))
             return ResponseEntity.badRequest().body("No username provided");
@@ -68,12 +71,13 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
 
-        ResponseEntity<?> temp = ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body("{\"id\": " + userDetails.getId() + "\n\"Email\":  " + userDetails.getEmail() + ",\n\"role:" + roles + "}");
+        Map<String,String> responsePayload = new HashMap<>();
+        responsePayload.put("id",userDetails.getId().toString());
+        responsePayload.put("email",userDetails.getEmail());
+        responsePayload.put("roles",roles.toString());
 
-        System.out.println("Resp: " + temp);
-
-        return temp;
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .body(this.objectMapper.writeValueAsString(responsePayload));
     }
 
     @PostMapping("/signup")
