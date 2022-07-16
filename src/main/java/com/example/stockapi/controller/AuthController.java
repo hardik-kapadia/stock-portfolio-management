@@ -167,7 +167,7 @@ public class AuthController {
                 .body("You've been signed out!");
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest, @Valid @RequestBody Map<String, String> payload) {
 
@@ -184,6 +184,5 @@ public class AuthController {
         userRepository.delete(u);
 
         return ResponseEntity.ok("User with username: " + u.getEmail() + " was deleted successfully");
-
     }
 }

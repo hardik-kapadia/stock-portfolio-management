@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/stocks")
+@RequestMapping("/api/stocks")
 public class StockController {
 
     // Used to fetch Data from the API and then convert it to a preferred format
