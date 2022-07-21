@@ -7,10 +7,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Getter
@@ -193,6 +190,29 @@ public class User {
             this.investments.remove(investment);
 
         refresh();
+
+    }
+
+    public Optional<Investment> getInvestmentFromStock(String stockSymbol) {
+
+        for (Investment i : this.getInvestments()) {
+            if (i.getStock().getSymbol().equals(stockSymbol))
+                return Optional.of(i);
+        }
+
+        return Optional.empty();
+
+    }
+
+
+    public Optional<Investment> getInvestmentFromId(int investmentId) {
+
+        for (Investment i : this.getInvestments()) {
+            if (i.getId() == investmentId)
+                return Optional.of(i);
+        }
+
+        return Optional.empty();
 
     }
 }

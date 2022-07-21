@@ -127,17 +127,16 @@ public class UserController {
     public ResponseEntity<String> sellStock(HttpServletRequest httpServletRequest, @RequestBody Map<String, String> payload) {
 
         String tempInvestmentId = payload.getOrDefault("investmentId", null);
+        String stockSymbol = payload.getOrDefault("stockSymbol", null);
 
-        if (tempInvestmentId == null)
-            throw new IllegalArgumentException("No investment id provided");
-
+        if (tempInvestmentId == null && stockSymbol == null) {
+            throw new IllegalArgumentException("No investment or stockSymbol is provided");
+        }
         User user = this.userDao.getUserByEmail(this.jwtUtils.getUserNameFromJwtToken(this.jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow(IllegalArgumentException::new);
 
         this.updateUserInvestments(user);
 
-        int investmentId = Integer.parseInt(tempInvestmentId);
-
-        Optional<Investment> optionalInvestment = this.getInvestmentFromId(user, investmentId);
+        Optional<Investment> optionalInvestment = tempInvestmentId == null ? user.getInvestmentFromStock(stockSymbol) : user.getInvestmentFromId(Integer.parseInt(tempInvestmentId));
 
         if (optionalInvestment.isPresent()) {
 
@@ -149,18 +148,8 @@ public class UserController {
 
             user.sell(investment, quantity, sellingPrice);
 
-        } else {
-
-            String stockSymbol = payload.getOrDefault("stockSymbol", null);
-
-            if (stockSymbol == null)
-                return ResponseEntity.badRequest().body("stock symbol/ investment Id required");
-
-
-        }
-
-        if (optionalInvestment.isEmpty())
-            return ResponseEntity.badRequest().body("Invalid investment Id");
+        } else
+            return ResponseEntity.badRequest().body("Invalid investment Id or stock Symbol ");
 
         userDao.saveAndFlush(user);
 
