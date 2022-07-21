@@ -1,0 +1,3 @@
+[submodule "stock-portfolio-management-frontend"]
+	path = stock-portfolio-management-frontend
+	url = git@github.com:thecoderenroute/stock-portfolio-management-frontend.git
