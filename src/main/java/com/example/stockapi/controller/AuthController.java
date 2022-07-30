@@ -82,7 +82,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) {
-
+        System.out.println(payload);
         if (!payload.containsKey("username"))
             return ResponseEntity.badRequest().body("No username provided");
 
@@ -95,16 +95,16 @@ public class AuthController {
         if (!payload.containsKey("name"))
             return ResponseEntity.badRequest().body("No Name provided");
 
-        if (!payload.containsKey("accountnumber"))
+        if (!payload.containsKey("accountNumber"))
             return ResponseEntity.badRequest().body("No accountNumber provided");
 
         if (userRepository.existsByAccountNumber(payload.get("accountNumber")))
             return ResponseEntity.badRequest().body("Error: Account Number is already in use!");
 
-        if (!payload.containsKey("mobilenumber"))
+        if (!payload.containsKey("mobileNumber"))
             return ResponseEntity.badRequest().body("No mobile number provided");
 
-        if (userRepository.existsByMobileNumber(payload.get("mobilenumber")))
+        if (userRepository.existsByMobileNumber(payload.get("mobileNumber")))
             return ResponseEntity.badRequest().body("Error: Mobile Number is already in use!");
 
         Set<Role> roles = new HashSet<>();
@@ -152,7 +152,7 @@ public class AuthController {
 
         // Create new user's account
         User user = new User(payload.get("name"), payload.get("email"),
-                payload.get("mobilenumber"), encoder.encode(payload.get("password")), payload.get("accountnumber"));
+                payload.get("mobileNumber"), encoder.encode(payload.get("password")), payload.get("accountNumber"));
 
         user.setRoles(roles);
         userRepository.save(user);
