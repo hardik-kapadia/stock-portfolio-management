@@ -37,7 +37,6 @@ public class StockDataRepo {
 
     }
 
-
     private ResponseEntity<JsonNode> getResponseForQuote(String symbol) {
 
         String uri = UriComponentsBuilder.fromUriString(baseUrl)

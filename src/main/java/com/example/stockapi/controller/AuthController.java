@@ -82,14 +82,14 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) {
-        System.out.println(payload);
-        if (!payload.containsKey("username"))
-            return ResponseEntity.badRequest().body("No username provided");
-
+        
         if (!payload.containsKey("password"))
             return ResponseEntity.badRequest().body("No password provided");
 
-        if (userRepository.existsByEmail(payload.get("username")))
+        if (!payload.containsKey("email"))
+            return ResponseEntity.badRequest().body("No E-mail ID/ Username provided");
+
+        if (userRepository.existsByEmail(payload.get("email")))
             return ResponseEntity.badRequest().body("Error: Email is already in use!");
 
         if (!payload.containsKey("name"))
@@ -148,7 +148,6 @@ public class AuthController {
                 default -> throw new RuntimeException("No such role");
             }
         }
-
 
         // Create new user's account
         User user = new User(payload.get("name"), payload.get("email"),
