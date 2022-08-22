@@ -27,30 +27,33 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.*;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    final AuthenticationManager authenticationManager;
+
+    final UserDao userRepository;
+
+    final RoleDao roleRepository;
+
+    final PasswordEncoder encoder;
+
+    final JwtUtils jwtUtils;
+    final ObjectMapper objectMapper;
 
     @Autowired
-    UserDao userRepository;
+    public AuthController(AuthenticationManager authenticationManager, UserDao userRepository, RoleDao roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils, ObjectMapper objectMapper) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.encoder = encoder;
+        this.jwtUtils = jwtUtils;
+        this.objectMapper = objectMapper;
+    }
 
-    @Autowired
-    RoleDao roleRepository;
-
-    @Autowired
-    PasswordEncoder encoder;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @PostMapping(value = "/signin",produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> payload) throws JsonProcessingException {
 
         if (!payload.containsKey("username"))
@@ -71,10 +74,10 @@ public class AuthController {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).toList();
 
-        Map<String,String> responsePayload = new HashMap<>();
-        responsePayload.put("id",userDetails.getId().toString());
-        responsePayload.put("email",userDetails.getEmail());
-        responsePayload.put("roles",roles.toString());
+        Map<String, String> responsePayload = new HashMap<>();
+        responsePayload.put("id", userDetails.getId().toString());
+        responsePayload.put("email", userDetails.getEmail());
+        responsePayload.put("roles", roles.toString());
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                 .body(this.objectMapper.writeValueAsString(responsePayload));
@@ -82,7 +85,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) {
-        
+
         if (!payload.containsKey("password"))
             return ResponseEntity.badRequest().body("No password provided");
 
