@@ -14,5 +14,3 @@ Technologies:
 
 Swagger:
 {base-url}/swagger-ui/index.html
-
-Planning to add a React/ Angular front-end.
