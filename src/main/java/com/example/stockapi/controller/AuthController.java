@@ -89,7 +89,7 @@ public class AuthController {
     }
 
     @PostMapping("/signUp")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) throws JsonProcessingException {
 
         if (!payload.containsKey("password"))
             return ResponseEntity.badRequest().body("No password provided");
@@ -164,24 +164,22 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(this.objectMapper.readTree("{\"message\":\"User created successfully\"}"));
     }
 
     @PostMapping("/signOut")
-    public ResponseEntity<?> logoutUser() {
+    public ResponseEntity<?> logoutUser() throws JsonProcessingException {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body("You've been signed out!");
+                .body(this.objectMapper.readTree("{\"message\":\"User signed out successfully\"}"));
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest, @Valid @RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> deleteUser(HttpServletRequest httpServletRequest, @Valid @RequestBody Map<String, String> payload) throws JsonProcessingException {
 
         if (!payload.containsKey("password"))
             return ResponseEntity.badRequest().body("No password provided");
-
-        logger.info("pass: " + payload.get("password"));
 
         User u = userRepository.getUserByEmail(jwtUtils.getUserNameFromJwtToken(jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow();
 
@@ -189,12 +187,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Incorrect password");
         }
 
-        logger.info("Can delete !!123");
 
         userRepository.delete(u);
 
         logoutUser();
 
-        return ResponseEntity.ok("User with username: " + u.getEmail() + " was deleted successfully");
+        return ResponseEntity.ok(this.objectMapper.readTree("{\"message\":\"User deleted successfully\"}"));
     }
 }

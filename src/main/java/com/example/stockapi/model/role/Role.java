@@ -1,10 +1,10 @@
 package com.example.stockapi.model.role;
 
 
-import com.example.stockapi.model.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 
 import javax.persistence.*;
 
@@ -22,9 +22,6 @@ public class Role {
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private ERole name;
-
-    @ManyToOne()
-    private User user;
 
     public Role(ERole name) {
         this.name = name;

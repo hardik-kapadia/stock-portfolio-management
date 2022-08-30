@@ -10,6 +10,9 @@ import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static javax.persistence.CascadeType.DETACH;
+import static javax.persistence.CascadeType.PERSIST;
+
 @Getter
 @Setter
 @ToString
@@ -40,10 +43,11 @@ public class User {
     private Double netInvested;
     private Double netPortfolioValue;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL, CascadeType.REMOVE})
+    //    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL, CascadeType.REMOVE})
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {PERSIST, DETACH})
     @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
 
