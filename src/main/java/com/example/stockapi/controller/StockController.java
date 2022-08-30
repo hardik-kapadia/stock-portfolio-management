@@ -44,7 +44,7 @@ public class StockController {
             Stock stock = this.stockDataRepo.getStockFromSymbol(symbol);
             return new ResponseEntity<>(stock, httpHeaders, HttpStatus.OK);
         } catch (IllegalArgumentException iae) {
-            System.out.println("Caught an illegal arguement exception");
+            System.out.println("Caught an illegal argument exception");
             return ResponseEntity.badRequest().headers(httpHeaders).body("No stock found for the symbol");
         }
     }

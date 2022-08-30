@@ -13,8 +13,11 @@ import javax.transaction.Transactional;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    UserDao userRepository;
+    final UserDao userRepository;
+
+    public UserDetailsServiceImpl(UserDao userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     @Transactional

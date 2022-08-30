@@ -197,7 +197,7 @@ public class UserController {
                 stock = this.stockDataRepo.getStockFromSymbol(stockSymbol);
                 quantity = Integer.parseInt(payload.getOrDefault("quantity", "0"));
 
-                System.out.println("Succesfully set: " + stock + " with q: " + quantity);
+                System.out.println("Successfully set: " + stock + " with q: " + quantity);
 
             } catch (ApiException e) {
                 return ResponseEntity.badRequest().body("stock symbol/ investment Id required");

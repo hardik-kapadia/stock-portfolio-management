@@ -9,6 +9,8 @@ import com.example.stockapi.security.jwt.JwtUtils;
 import com.example.stockapi.security.services.UserDetailsImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +45,8 @@ public class AuthController {
     final JwtUtils jwtUtils;
     final ObjectMapper objectMapper;
 
+    final Logger logger;
+
     @Autowired
     public AuthController(AuthenticationManager authenticationManager, UserDao userRepository, RoleDao roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils, ObjectMapper objectMapper) {
         this.authenticationManager = authenticationManager;
@@ -51,9 +55,10 @@ public class AuthController {
         this.encoder = encoder;
         this.jwtUtils = jwtUtils;
         this.objectMapper = objectMapper;
+        this.logger = LoggerFactory.getLogger(AuthController.class);
     }
 
-    @PostMapping(value = "/signin", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/signIn", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> authenticateUser(@RequestBody Map<String, String> payload) throws JsonProcessingException {
 
         if (!payload.containsKey("username"))
@@ -83,7 +88,7 @@ public class AuthController {
                 .body(this.objectMapper.writeValueAsString(responsePayload));
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/signUp")
     public ResponseEntity<?> registerUser(@Valid @RequestBody Map<String, String> payload) {
 
         if (!payload.containsKey("password"))
@@ -162,7 +167,7 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully!");
     }
 
-    @PostMapping("/signout")
+    @PostMapping("/signOut")
     public ResponseEntity<?> logoutUser() {
         ResponseCookie cookie = jwtUtils.getCleanJwtCookie();
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -176,14 +181,19 @@ public class AuthController {
         if (!payload.containsKey("password"))
             return ResponseEntity.badRequest().body("No password provided");
 
-        String p = encoder.encode(payload.get("password"));
+        logger.info("pass: " + payload.get("password"));
 
         User u = userRepository.getUserByEmail(jwtUtils.getUserNameFromJwtToken(jwtUtils.getJwtFromCookies(httpServletRequest))).orElseThrow();
 
-        if (!p.equals(u.getPassword()))
+        if (!this.encoder.matches(payload.get("password"), u.getPassword())) {
             return ResponseEntity.badRequest().body("Incorrect password");
+        }
+
+        logger.info("Can delete !!123");
 
         userRepository.delete(u);
+
+        logoutUser();
 
         return ResponseEntity.ok("User with username: " + u.getEmail() + " was deleted successfully");
     }

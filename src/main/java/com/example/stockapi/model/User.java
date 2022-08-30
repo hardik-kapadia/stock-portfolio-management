@@ -40,7 +40,7 @@ public class User {
     private Double netInvested;
     private Double netPortfolioValue;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL, CascadeType.REMOVE})
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -203,7 +203,6 @@ public class User {
         return Optional.empty();
 
     }
-
 
     public Optional<Investment> getInvestmentFromId(int investmentId) {
 
