@@ -4,7 +4,7 @@ import com.example.stockapi.model.stock.Stock;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 @AllArgsConstructor

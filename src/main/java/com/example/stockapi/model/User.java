@@ -4,14 +4,15 @@ import com.example.stockapi.model.role.Role;
 import com.example.stockapi.model.stock.Stock;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static javax.persistence.CascadeType.DETACH;
-import static javax.persistence.CascadeType.PERSIST;
+import static jakarta.persistence.CascadeType.DETACH;
+import static jakarta.persistence.CascadeType.PERSIST;
+
 
 @Getter
 @Setter
@@ -43,7 +44,6 @@ public class User {
     private Double netInvested;
     private Double netPortfolioValue;
 
-    //    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL, CascadeType.REMOVE})
     @ManyToMany(fetch = FetchType.EAGER, cascade = {PERSIST, DETACH})
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
