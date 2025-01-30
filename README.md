@@ -1,6 +1,6 @@
 # stock-portfolio-management
 Complete backend as a REST API for a stock-market portfolio management application, with proper authentication, login/ logout system, live stock prices, etc.
-
+Front-end: https://github.com/hardik-kapadia/stock-portfolio-management-frontend
 Technologies:
 
 - Spring boot (with JDK 17)
